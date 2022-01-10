@@ -2,10 +2,10 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
   library(dplyr)
   library(data.table)
   
-  # Return an empty data frame if an empty data frame was provided.
+  # Return an empty tibble if an empty data frame was provided.
   if(nrow(x) == 0) return(tibble())
   
-  # Return an empty data frame if no rows remain after filtering alignments.
+  # Return an empty tibble if no rows remain after filtering alignments.
   x <- subset(x, alignmentLength >= minAlignmentLength & gapopen <= 1 & pident >= minPercentID)
   if(nrow(x) == 0) return(tibble())
   
@@ -17,12 +17,11 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
   
   # Create a splitting vector to split the data across n CPUs while making 
   # sure that query ids are not split across CPUs.
-  z <- as.data.table(
-             bind_rows(
-                  mapply(function(x, n){ x$n <- n; x }, 
+  z <- rbindlist(
+          mapply(function(x, n){ x$n <- n; x }, 
                          z, 
                          dplyr::ntile(1:length(z), CPUs), 
-                         SIMPLIFY = FALSE)))
+                         SIMPLIFY = FALSE))
   
   
   # Process the BLAST result in parallel.
