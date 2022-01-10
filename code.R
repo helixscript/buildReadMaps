@@ -26,10 +26,10 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
   
   
   # Process the BLAST result in parallel.
-  # Each worker function will return a data.table object which will be collated and coerced 
-  # into a tibble by bind_rows().
+  # Each worker function will return a data.table object which will be collated and'
+  # bound into a single data.table object.
   
-  r <- bind_rows(parallel::parLapply(cluster, split(z, z$n), function(b){
+  r <- rbindlist(parallel::parLapply(cluster, split(z, z$n), function(b){
   #r <- rbindlist(lapply(split(z, z$n), function(b){
     library(dplyr)
     library(IRanges)
@@ -86,7 +86,7 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
   }))
   
   parallel::stopCluster(cluster)
-  r
+  as_tibble(r)
 }
 
 
