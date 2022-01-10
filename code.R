@@ -93,4 +93,3 @@ r <- blast2rearangements(readRDS('blastResult.rds'))
 
 # Show reads with rearrangements.
 r[grepl(';', r$rearrangement),]
-
