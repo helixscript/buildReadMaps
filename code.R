@@ -63,13 +63,13 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
       names(ir) <- paste0(b2$qstart, '..', b2$qend, '[', b2$sstart2, b2$strand, b2$send2, ']')
       
       # The ranges are ordered by start position and significance. 
+      # Start with the first range, loop through other ranges and add new 
+      # range if it does not overlap with the previous fragment while overlooking 2 NT overlaps.
+      #
       # 10 -------------           (start)
       # 10 ---                     (don't add)
       #      15 --------           (don't add)
       #                    50 ---  (add)
-      #
-      # Start with the first range, loop through other ranges and add new 
-      # fragments if they do not overlap with the previous fragment while overlooking 2 NT overlaps.
       
       o <- ir[1]
       invisible(lapply(split(ir, 1:length(ir)), function(a){
