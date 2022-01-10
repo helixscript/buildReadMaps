@@ -5,11 +5,11 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
   library(data.table)
   
   # Return an empty data frame if an empty data frame was provided.
-  if(nrow(x) == 0) return(data.frame())
+  if(nrow(x) == 0) return(tibble())
   
   # Return an empty data frame if no rows remain after filtering alignments.
   x <- subset(x, alignmentLength >= minAlignmentLength & gapopen <= 1 & pident >= minPercentID)
-  if(nrow(x) == 0) return(data.frame())
+  if(nrow(x) == 0) return(tibble())
   
   # Create a virtual cluster for parallel processing.
   cluster <- parallel::makeCluster(CPUs)
@@ -26,6 +26,10 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
                          dplyr::ntile(1:length(z), CPUs), 
                          SIMPLIFY = FALSE)))
   
+  
+  # Process the BLAST result in parallel.
+  # Each worker function will return a data.table object which will be collated and coerced 
+  # into a tibble by bind_rows().
   
   r <- bind_rows(parallel::parLapply(cluster, split(z, z$n), function(b){
   #r <- rbindlist(lapply(split(z, z$n), function(b){
@@ -61,7 +65,7 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
       # Name the ranges with the binned query positions followed by the actual subject positions.
       names(ir) <- paste0(b2$qstart, '..', b2$qend, '[', b2$sstart2, b2$strand, b2$send2, ']')
       
-      # The ranges are ordered by start position and significance 
+      # The ranges are ordered by start position and significance. 
       # 10 -------------           (start)
       # 10 ---                     (don't add)
       #      15 --------           (don't add)
@@ -77,11 +81,9 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
         }
       }))
       
-      if(length(o) == 0) return(data.frame())
-      
       r <- paste0(unique(names(o)), collapse = ';')
       
-      data.frame(qname = b2$qname[1], rearrangement = r)
+      data.table(qname = b2$qname[1], rearrangement = r)
     }))
   }))
   
