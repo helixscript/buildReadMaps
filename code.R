@@ -88,7 +88,6 @@ blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, C
   as_tibble(r)
 }
 
-
 r <- blast2rearangements(readRDS('blastResult.rds'))
 
 # Show reads with rearrangements.
