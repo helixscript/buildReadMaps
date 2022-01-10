@@ -1,5 +1,3 @@
-
-
 blast2rearangements <- function(x, minAlignmentLength = 10, minPercentID = 95, CPUs = 20){
   library(dplyr)
   library(data.table)
